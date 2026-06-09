@@ -1,43 +1,18 @@
-import streamlit as st
+from flask import Flask, request, jsonify
 import joblib
 import pandas as pd
+import numpy as np
 
-model = joblib.load("model.pkl")
+app = Flask(__name__)
+model = joblib.load('model.pkl')
 
-st.title("House Price Prediction")
+@app.route('/predict', methods=['POST'])
+def predict():
+    data = request.get_json()
+    df = pd.DataFrame([data])
+    prediction = model.predict(df)[0]
+    return jsonify({'predicted_price': round(float(prediction), 2)})
 
-# ===== INPUTS (MATCH TRAINING FEATURES) =====
-
-longitude = st.number_input("Longitude")
-latitude = st.number_input("Latitude")
-
-housing_median_age = st.number_input("Housing Median Age")
-total_rooms = st.number_input("Total Rooms")
-total_bedrooms = st.number_input("Total Bedrooms")
-population = st.number_input("Population")
-households = st.number_input("Households")
-median_income = st.number_input("Median Income")
-
-ocean_proximity = st.selectbox(
-    "Ocean Proximity",
-    ["<1H OCEAN", "INLAND", "ISLAND", "NEAR BAY", "NEAR OCEAN"]
-)
-
-# ===== PREDICT =====
-if st.button("Predict Price"):
-
-    input_data = pd.DataFrame([{
-        "longitude": longitude,
-        "latitude": latitude,
-        "housing_median_age": housing_median_age,
-        "total_rooms": total_rooms,
-        "total_bedrooms": total_bedrooms,
-        "population": population,
-        "households": households,
-        "median_income": median_income,
-        "ocean_proximity": ocean_proximity
-    }])
-
-    prediction = model.predict(input_data)[0]
-
-    st.success(f"Predicted Price: {round(float(prediction), 2)}")
+if __name__ == '__main__':
+    from waitress import serve
+    serve(app, host='0.0.0.0', port=8080)
