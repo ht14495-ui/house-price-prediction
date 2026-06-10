@@ -15,4 +15,8 @@ def predict():
 
 if __name__ == '__main__':
     from waitress import serve
+<<<<<<< HEAD
     serve(app, host='0.0.0.0', port=8080)
+=======
+    serve(app, host='0.0.0.0', port=8080)
+>>>>>>> 4b4ac610562285bbc35c35bce1e124cb5d444165
